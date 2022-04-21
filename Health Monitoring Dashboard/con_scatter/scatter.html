@@ -1,0 +1,154 @@
+<!-- Code from d3-graph-gallery.com -->
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+
+  <!-- Load d3.js -->
+  <script src="https://d3js.org/d3.v4.js"></script>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap" rel="stylesheet">
+
+  <style>
+    body{
+      font-family: 'Source Sans Pro', sans-serif;
+      background-color: #EEEEEE;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Create a div where the graph will take place -->
+  <div id="my_dataviz"></div>
+
+
+  <script>
+    // set the dimensions and margins of the graph
+    var margin = {
+        top: 10,
+        right: 30,
+        bottom: 30,
+        left: 60
+      },
+      width = 360 - margin.left - margin.right,
+      height = 270 - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#my_dataviz")
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform",
+        "translate(" + margin.left + "," + margin.top + ")");
+
+    //Read the data
+    d3.csv("main.csv",
+      // When reading the csv, I must format variables:
+      function (d) {
+        return {
+          Hours: d.Hours,
+          Calories_Burn: d.Calories_Burn
+        }
+      },
+      // Now I can use this dataset:
+      function (data) {
+        // Add X axis --> it is a date format
+        var x = d3.scaleTime()
+          .domain([0, 25])
+          .range([0, width]);
+        svg.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x));
+        svg.append("text")
+          .attr("transform",
+            "translate(" + (width / 2) + " ," +
+            (height + margin.top + 20) + ")")
+          .style("text-anchor", "middle")
+          .text("Hours");
+        // Add Y axis
+        var y = d3.scaleLinear()
+          .domain([0, 40])
+          .range([height, 0]);
+        svg.append("g")
+          .call(d3.axisLeft(y));
+
+        svg.append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("y", -6 - margin.left)
+          .attr("x", 0 - (height / 2))
+          .attr("dy", "1em")
+          .style("text-anchor", "middle")
+          .text("Calories Burn");
+        // Add the line
+        svg.append("path")
+          .datum(data)
+          .attr("fill", "none")
+          .attr("stroke", "#FFD36E")
+          .attr("stroke-width", 1.5)
+          .attr("d", d3.line()
+            .x(function (d) {
+              return x(d.Hours)
+            })
+            .y(function (d) {
+              return y(d.Calories_Burn)
+            })
+          )
+
+        var Tooltip = d3.select("#my_dataviz")
+          .append("div")
+          .style("opacity", 0)
+          .attr("class", "tooltip")
+          .style("background-color", "white")
+          .style("border", "solid")
+          .style("border-width", "2px")
+          .style("border-radius", "5px")
+          .style("padding", "5px")
+
+        var mouseover = function (d) {
+          Tooltip
+            .style("opacity", 1)
+        }
+        var mousemove = function (d) {
+          Tooltip
+            .html("Calories Burn: " + d.Calories_Burn)
+            .style("left", (d3.mouse(this)[0] + 70) + "px")
+            .style("top", (d3.mouse(this)[1]) + "px")
+        }
+        var mouseleave = function (d) {
+          Tooltip
+            .style("opacity", 0)
+        }
+
+
+        // Add the points
+
+        svg
+          .append("g")
+          .selectAll("dot")
+          .data(data)
+          .enter()
+          .append("circle")
+          .attr("class", "myCircle")
+          .attr("cx", function (d) {
+            return x(d.Hours)
+          })
+          .attr("cy", function (d) {
+            return y(d.Calories_Burn)
+          })
+          .attr("r", 4)
+          .attr("stroke", "#FF5F00")
+          .attr("stroke-width", 3)
+          .attr("fill", "white")
+          .on("mouseover", mouseover)
+          .on("mousemove", mousemove)
+          .on("mouseleave", mouseleave)
+      })
+  </script>
+</body>
+
+</html>
