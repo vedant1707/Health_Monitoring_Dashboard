@@ -1,0 +1,158 @@
+<!-- Code from d3-graph-gallery.com -->
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+
+  <!-- Load d3.js -->
+  <script src="https://d3js.org/d3.v4.js"></script>
+
+  <!-- Color scale -->
+  <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+  <script src="js/script.js"></script>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Source Sans Pro', sans-serif;
+    }
+
+    button {
+      background-color: #e7e7e7;
+      color: black;
+      border-radius: 5px;
+    }
+
+    div {
+      display: inline-block;
+    }
+    img{
+      position: absolute;
+      right: 1px;
+    }
+  </style>
+
+</head>
+
+<body>
+  <!-- Add 2 buttons -->
+  
+
+  <!-- Create a div where the graph will take place -->
+  <div id="my_dataviz">
+    <div id = "div2" style="display:none">
+      <img src="images/temprature.png" alt="" height="150" width="150">
+    </div>
+    <div id = "div1" style="display:block">
+      <img src="images/Sleep4.png" alt="" height="150" width="150">
+    </div>
+  <button onclick="update(sleep, 4)">Sleep</button>
+  <button onclick="update(temprature, 6)">Temprature</button>
+  
+  </div>
+
+
+  <script>
+    // set the dimensions and margins of the graph
+    var width = 420
+    var height = 357
+    var margin = 40
+
+    // The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
+    var radius = Math.min(width, height) / 2 - margin
+
+    // append the svg object to the div called 'my_dataviz'
+    var svg = d3.select("#my_dataviz")
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .append("g")
+      .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+    // create 2 data_set
+    var sleep = {
+      a: 16,
+      b: 2,
+      c: 4,
+      d: 2
+    }
+    var temprature = {
+      a: 4,
+      b: 5,
+      c: 1,
+      d: 2,
+      e: 3,
+      f: 6,
+      g: 3,
+    }
+
+
+    // set the color scale
+    var color = d3.scaleOrdinal()
+      .domain(["a", "b", "c", "d", "e", "f", "g"])
+      .range(d3.schemeDark2);
+
+    // A function that create / update the plot for a given variable:
+    function update(data, n) {
+     
+      if(n === 4)
+      {
+        document.getElementById("div1").style.display="block";
+        document.getElementById("div2").style.display="none";
+      }
+      if(n === 6)
+      {
+        
+        document.getElementById("div1").style.display="none";
+        document.getElementById("div2").style.display="block";
+      }
+
+      // Compute the position of each group on the pie:
+      var pie = d3.pie()
+        .value(function (d) {
+          return d.value;
+        })
+        .sort(function (a, b) {
+          console.log(a);
+          return d3.ascending(a.key, b.key);
+        }) // This make sure that group order remains the same in the pie chart
+      var data_ready = pie(d3.entries(data))
+
+      // map to data
+      var u = svg.selectAll("path")
+        .data(data_ready)
+
+      // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
+      u
+        .enter()
+        .append('path')
+        .merge(u)
+        .transition()
+        .duration(1000)
+        .attr('d', d3.arc()
+          .innerRadius(0)
+          .outerRadius(radius)
+        )
+        .attr('fill', function (d) {
+          return (color(d.data.key))
+        })
+        .attr("stroke", "white")
+        .style("stroke-width", "2px")
+        .style("opacity", 1)
+
+      // remove the group that is not present anymore
+      u
+        .exit()
+        .remove()
+    }
+
+    // Initialize the plot with the first dataset
+    update(sleep)
+  </script>
+</body>
+
+</html>
